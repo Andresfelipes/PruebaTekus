@@ -1,0 +1,269 @@
+﻿@model IEnumerable<PruebaTekusAPP.Models.Clientes>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<h2>Clientes</h2>
+
+<p>
+    @Html.ActionLink("Agregar", "Create")
+</p>
+<table class="table " id="myTable">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Nit)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Nombre)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Correo)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nit)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nombre)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Correo)
+            </td>
+            <td>
+                @Html.ActionLink("Editar", "Edit", new { id = item.Id }) |
+                @*@Html.ActionLink("Details", "Details", new { id = item.Id }) |*@
+                <a onclick="return AgregarServicio(@item.Id)"> Agregar Servicio </a>|
+
+                <a onclick="return VerServicios(@item.Id)"> Ver Servicios</a>
+
+            </td>
+        </tr>
+    }
+
+</table>
+
+<div class="modal" tabindex="-1" role="dialog" id="modalcliente">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar Servicio</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+
+                    <div class="col-md-6">
+                        <div hidden class="form-group">
+                            <label for="exampleInputEmail1">Nombre Servicio</label>
+                            <input type="text" class="form-control" id="idcliente">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">Nombre Servicio</label>
+                            <input type="text" class="form-control" id="nombreservicio">
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">Valor Hora</label>
+                            <input type="number" class="form-control" id="valorhora">
+                        </div>
+
+                    </div>
+                    <div class=" col-md-6">
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">Paises</label>
+                            <select id='mySelect' multiple="multiple" style="width:100%"></select>
+
+                        </div>
+                    </div>
+
+
+
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="GuardarServicio()">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" tabindex="-1" role="dialog" id="modalverservicios">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ver Servicios</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+
+                    <table class="table table-hover" id="tableservice">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Nombre Servicio</th>
+                                <th scope="col">Valor Hora</th>
+
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="~/Model/Clientes.js"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+    $('#mySelect').select2();
+
+
+});
+
+
+
+function AgregarServicio(id) {
+
+    $.ajax({
+        url: '@Url.Action("VerPais", "Clientes")',
+        type: 'GET',
+
+        success: function (response) {
+            if (response.success) {
+                $.each(response.Paises, function (index, value) {
+                    $('#mySelect').append('<option value="' + value.Id + '">' + value.Nombre + '</option>');
+
+                });
+
+                $("#idcliente").val(id);
+                $("#modalcliente").modal('show');
+                return;
+            } else {
+                alert("No se pudo");
+                return;
+            }
+        }
+    });
+    return;
+}
+
+
+function VerServicios(id) {
+
+    $.ajax({
+        url: '@Url.Action("VerServicios", "Clientes")',
+        type: 'POST',
+        data: { id: id },
+        success: function (response) {
+            if (response.success) {
+                $("#tableservice tbody").empty();
+
+                $.each(response.Services, function (index, value) {
+                    $("#tableservice tbody").append("<tr><td>" + (index + 1) + "</td><td>" + value.Nombre + "</td><td>" + value.ValorHora + "</td></tr>")
+                });
+
+                $("#modalverservicios").modal('show');
+                return;
+            } else {
+                alert("No se pudo");
+                return;
+            }
+        }
+    });
+}
+
+
+function GuardarServicio() {
+
+    var Nombre = $("#nombreservicio").val();
+    var ValorHora = $("#valorhora").val();
+    var Paises = [];
+    var IdCliente = $("#idcliente").val();
+    Paises = $("#mySelect").val();
+    var procesoData = {
+        'Paises': []
+    };
+
+
+    for (var i = 0; i < Paises.length; i++) {
+
+        procesoData.Paises.push({
+            'Id': Paises[i]
+
+        })
+    }
+
+    var dato = procesoData.Paises;
+
+
+    $.ajax({
+        url: '@Url.Action("GuardarServicio", "Servicios")',
+        type: 'POST',
+        dataType: 'json',
+
+        data:
+        {
+            Servicios: {
+                'Nombre': Nombre,
+                'ValorHora': ValorHora
+
+            },
+            Paises: dato,
+            IdCliente: IdCliente
+
+        },
+        success: function (response) {
+            if (response.success) {
+                alert("Servicio registrado con exito");
+                $("#modalcliente").modal('hide');
+
+                $("#nombreservicio").val("");
+                $("#valorhora").val("");
+                $("#mySelect").val("");
+
+                setTimeout(function () {
+                    $("#mySelect").trigger("change").val("");
+                }, 300)
+
+
+                return;
+            } else {
+                alert("No se pudo");
+                return;
+            }
+        }
+    });
+
+
+}
+
+
+            //$(".selectpicker").selectpicker();
+</script>
+

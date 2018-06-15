@@ -1,0 +1,114 @@
+﻿@model IEnumerable<PruebaTekusAPP.ViewModels.ServicioDTO>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Index</h2>
+
+<p>
+
+</p>
+<br />
+<br />
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.NombleCliente)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Nombre)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ValorHora)
+        </th>
+
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.NombleCliente)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Nombre)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.ValorHora)
+        </td>
+
+        <td>
+            @Html.ActionLink("Editar", "Edit", new { id = item.Id }) |
+            <a onclick="return VerPaises(@item.Id)"> Ver Paises </a>
+        </td>
+    </tr>
+}
+
+</table>
+
+
+<div class="modal" tabindex="-1" role="dialog" id="modalverpaises">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ver Servicios</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+
+                    <table class="table table-hover" id="tablepaises">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Nombre Pais</th>
+                               
+
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    function VerPaises(id) {
+
+          $.ajax({
+            url: '@Url.Action("VerPaises", "Servicios")',
+            type: 'POST',
+            data: { id: id },
+            success: function (response) {
+                if (response.success) {
+                    $("#tablepaises tbody").empty();
+
+                    $.each(response.Paises, function (index, value) {
+                        $("#tablepaises tbody").append("<tr><td>" + (index+1) + "</td><td>" + value.Nombre + "</td></tr>")
+                    });
+
+                    $("#modalverpaises").modal('show');
+                    return;
+                } else {
+                    alert("No se pudo");
+                    return;
+                }
+            }
+        });
+    }
+
+</script>
